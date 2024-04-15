@@ -1,91 +1,49 @@
-# Документация для TinkoffPayouts API
+# Документация для API Тинькофф кассы
 
 ## Описание
-
-Класс `TinkoffPayouts` предоставляет методы для работы с массовыми выплатами через API Тинькофф Кассы. Он позволяет регистрировать клиентов, управлять данными клиентов и картами, инициировать и проверять выплаты.
-
-## Перечисление методов:
-
-1. [add_customer()](#add_customer) - Регистрация клиента.
-2. [get_customer()](#get_customer) - Получение данных клиента.
-3. [remove_customer()](#remove_customer) - Удаление клиента.
-4. [get_card_list()](#get_card_list) - Получение списка привязанных карт клиента.
-5. [add_card()](#add_card) - Привязка новой карты к клиенту.
-6. [remove_card()](#remove_card) - Удаление привязанной карты.
-7. [init_payout()](#init_payout) - Инициация выплаты.
-8. [confirm_payout()](#confirm_payout) - Подтверждение выплаты.
-9. [get_payout_status()](#get_payout_status) - Получение статуса выплаты.
-
-## Список методов со всеми внутренними параметрами:
-
-### <a name="add_customer"></a>add_customer()
-
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-- `email` (str, optional): Электронная почта клиента.
-- `phone` (str, optional): Номер телефона клиента.
-
-### <a name="get_customer"></a>get_customer()
-
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-
-### <a name="remove_customer"></a>remove_customer()
-
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-
-### <a name="get_card_list"></a>get_card_list()
-
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-
-### <a name="add_card"></a>add_card()
-
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-- `check_type` (str, optional): Тип проверки карты.
-
-### <a name="remove_card"></a>remove_card()
-
-- `card_id` (int): Идентификатор карты в системе Тинькофф Кассы.
-- `customer_key` (str): Идентификатор клиента в системе Мерчанта.
-
-### <a name="init_payout"></a>init_payout()
-
-- `order_id` (str): Уникальный номер заказа в системе Мерчанта.
-- `card_id` (str): Идентификатор карты пополнения.
-- `amount` (int): Сумма в копейках.
-- `data` (dict, optional): Дополнительные параметры.
-
-### <a name="confirm_payout"></a>confirm_payout()
-
-- `payment_id` (str): Идентификатор транзакции в системе Тинькофф Кассы.
-
-### <a name="get_payout_status"></a>get_payout_status()
-
-- `payment_id` (int): Идентификатор операции в системе Тинькофф Кассы.
+Эта библиотека предоставляет программный интерфейс для интеграции с сервисами Тинькофф Кассы. С её помощью можно автоматизировать процессы создания, управления и отслеживания транзакций.
 
 ## Как пользоваться:
+1. **Установка и настройка**:
+   - Установите библиотеку, используя команду 
+   - `pip install -r requirements.txt`.
 
-Для начала, вам нужно создать экземпляр класса `TinkoffPayouts`, передав необходимые параметры:
+2. **Инициализация менеджеров**:
+   ```python
+    from TinkoffKassa.api import create_customer_manager, create_deal_manager
 
-```python
-terminal_key = "YOUR_TERMINAL_KEY"
-x509_serial_number = "YOUR_X509_SERIAL_NUMBER"
-private_key_path = "path_to_private.key"
+    customer_manager = create_customer_manager('your_terminal_key', 'your_x509')
+    deal_manager = create_deal_manager('your_terminal_key')
+    ```
+3. **Вызов метода**:
+    ```python
+    deal_response = deal_manager.init_deal(order_id, amount)
+    ```
+   
+## Список методов
 
-payouts = TinkoffPayouts(terminal_key, x509_serial_number, private_key_path)
-```
+### Класс `create_deal_manager`
 
-Теперь, вы можете использовать различные методы класса для работы с API:
+1. `init_deal(self, order_id, amount)` - Инициирует сделку с указанным идентификатором заказа и суммой.
 
-```python
-# Регистрация нового клиента
-response = payouts.add_customer("customer_123", email="customer@example.com", phone="+71234567890")
+2. `confirm_deal(self, payment_id)` - Подтверждает сделку с указанным идентификатором платежа.
 
-# Получение данных о клиенте
-customer_data = payouts.get_customer("customer_123")
+3. `cancel_deal(self, payment_id)` - Отменяет сделку с указанным идентификатором платежа.
 
-# Инициирование выплаты
-payout_response = payouts.init_payout("order_456", "card_789", 10000)
+4. `payment(self, payment_id, card_id, amount)` - Осуществляет платеж по идентификатору платежа, идентификатору карты и сумме.
 
-# ... и так далее
-```
+### Класс `create_customer_manager`
 
-Обратите внимание на то, что вы должны управлять исключениями и проверять ответы от API на наличие ошибок.
+1. `add_customer(self, customer_key, email: str = None, phone: int = None)` - Добавляет нового клиента с указанным ключом клиента, электронной почтой и телефоном.
+
+2. `get_customer(self, customer_key)` - Возвращает информацию о клиенте по его ключу.
+
+3. `remove_customer(self, customer_key)` - Удаляет клиента по его ключу.
+
+4. `get_card_list(self, customer_key)` - Возвращает список карт, привязанных к клиенту по его ключу.
+
+5. `add_card(self, customer_key, check_type: str = None)` - Добавляет карту к клиенту с возможностью указать тип проверки.
+
+6. `check_3ds_version(self, payment_id, card_data, token)` - Проверяет версию 3DS для указанного платежа, данных карты и токена.
+
+7. `remove_card(self, card_id, customer_key)` - Удаляет карту по её идентификатору и ключу клиента.
